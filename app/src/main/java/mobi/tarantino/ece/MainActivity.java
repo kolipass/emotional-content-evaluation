@@ -19,6 +19,7 @@ public class MainActivity extends FaceTrackerActivity {
     protected Map<Integer, Face> faces = new HashMap<>();
     private View content;
     private Handler mHandler = new Handler();
+    private Toast toast;
 
     @Override
     public int getLayoutResID() {
@@ -73,16 +74,30 @@ public class MainActivity extends FaceTrackerActivity {
 
     private void showManyFacesError() {
         content.setVisibility(View.INVISIBLE);
-        Toast.makeText(this, "Two Faces in camera. Please look here", Toast.LENGTH_SHORT).show();
+        makeToast("Two Faces in camera. Please look here");
     }
 
     private void showContent() {
+        cansleToast();
         content.setVisibility(View.VISIBLE);
     }
 
     private void showNonFaceMessage() {
         content.setVisibility(View.INVISIBLE);
-        Toast.makeText(this, "No Face in camera. Please look here", Toast.LENGTH_SHORT).show();
+
+        makeToast("No Face in camera. Please look here");
+    }
+
+    private void makeToast(String text) {
+        cansleToast();
+        toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    private void cansleToast() {
+        if (toast != null) {
+            toast.cancel();
+        }
     }
 
     protected class CountFaceTrackerFactory implements MultiProcessor.Factory<Face> {
