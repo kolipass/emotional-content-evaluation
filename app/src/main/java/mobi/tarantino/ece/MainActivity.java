@@ -78,7 +78,7 @@ public class MainActivity extends FaceTrackerActivity {
     }
 
     private void showContent() {
-        cansleToast();
+        cancelToast();
         content.setVisibility(View.VISIBLE);
     }
 
@@ -89,12 +89,12 @@ public class MainActivity extends FaceTrackerActivity {
     }
 
     private void makeToast(String text) {
-        cansleToast();
+        cancelToast();
         toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
         toast.show();
     }
 
-    private void cansleToast() {
+    private void cancelToast() {
         if (toast != null) {
             toast.cancel();
         }
