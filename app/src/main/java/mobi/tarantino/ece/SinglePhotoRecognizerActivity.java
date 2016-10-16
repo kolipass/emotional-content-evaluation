@@ -1,5 +1,6 @@
 package mobi.tarantino.ece;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -18,19 +19,21 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.face.Face;
+import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import mobi.tarantino.ece.api.projectoxford.RecognizeResponse;
 import mobi.tarantino.ece.model.DetectFaceModel;
 import mobi.tarantino.ece.model.ProjectOxfordModel;
 import rx.Observer;
+import rx.functions.Action1;
 
-/**
- * Created by kolipass on 09.04.16.
- */
 public class SinglePhotoRecognizerActivity extends AppCompatActivity {
 
     private static final int TAKE_CAMERA_PHOTO_CODE = 3454;
@@ -41,9 +44,28 @@ public class SinglePhotoRecognizerActivity extends AppCompatActivity {
     private RecyclerView result;
     private ResultAdapter resultAdapter;
 
+    public static int fileCount(File folder, final String extension) {
+        final List<File> files = new ArrayList<>();
+        Collections.addAll(files, folder.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.toString().contains(extension);
+            }
+        }));
+        return files.size();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        RxPermissions.getInstance(this)
+                .request(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean granted) {
+                    }
+                });
 
         setContentView(R.layout.activity_single_recognize);
 
@@ -90,7 +112,7 @@ public class SinglePhotoRecognizerActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent result) {
         switch (requestCode) {
             case TAKE_CAMERA_PHOTO_CODE:
-                detect(getTempShotUri());
+                detect(getLastShotUri());
                 break;
             case TAKE_LIBRARY_PHOTO_CODE:
                 detect(result.getData());
@@ -109,7 +131,11 @@ public class SinglePhotoRecognizerActivity extends AppCompatActivity {
     }
 
     private Uri getTempShotUri() {
-        File tempshot = new File(getExternalCacheDir(), "temp_shot.jpg");
+
+        String extension = ".jpg";
+        String filename = fileCount(getExternalCacheDir(), extension) + extension;
+
+        File tempshot = new File(getExternalCacheDir(), filename);
         if (!tempshot.exists()) {
             try {
                 tempshot.createNewFile();
@@ -118,6 +144,13 @@ public class SinglePhotoRecognizerActivity extends AppCompatActivity {
         }
 
         return Uri.fromFile(tempshot);
+    }
+
+    private Uri getLastShotUri() {
+        String extension = ".jpg";
+        String filename = (fileCount(getExternalCacheDir(), extension) - 1) + extension;
+
+        return Uri.fromFile(new File(getExternalCacheDir(), filename));
     }
 
     protected void detect(Uri imageUri) {
