@@ -22,10 +22,7 @@ import com.google.android.gms.vision.face.Face;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import mobi.tarantino.ece.api.projectoxford.RecognizeResponse;
@@ -43,17 +40,6 @@ public class SinglePhotoRecognizerActivity extends AppCompatActivity {
     private ImageView imageView;
     private RecyclerView result;
     private ResultAdapter resultAdapter;
-
-    public static int fileCount(File folder, final String extension) {
-        final List<File> files = new ArrayList<>();
-        Collections.addAll(files, folder.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.toString().contains(extension);
-            }
-        }));
-        return files.size();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,7 +119,7 @@ public class SinglePhotoRecognizerActivity extends AppCompatActivity {
     private Uri getTempShotUri() {
 
         String extension = ".jpg";
-        String filename = fileCount(getExternalCacheDir(), extension) + extension;
+        String filename = FileUtils.fileCount(getExternalCacheDir(), extension) + extension;
 
         File tempshot = new File(getExternalCacheDir(), filename);
         if (!tempshot.exists()) {
@@ -148,7 +134,7 @@ public class SinglePhotoRecognizerActivity extends AppCompatActivity {
 
     private Uri getLastShotUri() {
         String extension = ".jpg";
-        String filename = (fileCount(getExternalCacheDir(), extension) - 1) + extension;
+        String filename = (FileUtils.fileCount(getExternalCacheDir(), extension) - 1) + extension;
 
         return Uri.fromFile(new File(getExternalCacheDir(), filename));
     }

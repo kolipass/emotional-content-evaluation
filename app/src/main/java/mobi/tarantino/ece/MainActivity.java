@@ -10,12 +10,13 @@ import com.google.android.gms.samples.vision.face.facetracker.GraphicFaceTracker
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
-import com.google.android.gms.vision.face.FaceDetector;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends FaceTrackerActivity {
+import static android.R.attr.id;
+
+public class MainActivity extends FaceTrackerActivity implements CountFaceTracker.Listener {
     protected Map<Integer, Face> faces = new HashMap<>();
     private View content;
     private Handler mHandler = new Handler();
@@ -42,12 +43,14 @@ public class MainActivity extends FaceTrackerActivity {
 
     }
 
-    protected void addFace(Integer id, Face face) {
+    @Override
+    public void addFace(int faceId, Face face) {
         faces.put(id, face);
         updateContentState();
     }
 
-    protected void removeFace(Integer id) {
+    @Override
+    public void removeFace(int id) {
         faces.remove(id);
         updateContentState();
     }
@@ -103,49 +106,7 @@ public class MainActivity extends FaceTrackerActivity {
     protected class CountFaceTrackerFactory implements MultiProcessor.Factory<Face> {
         @Override
         public Tracker<Face> create(Face face) {
-            return new CountFaceTracker();
-        }
-    }
-
-    private class CountFaceTracker extends Tracker<Face> {
-        Face item;
-        private int faceId;
-
-        CountFaceTracker() {
-        }
-
-        /**
-         * Start tracking the detected face instance within the face overlay.
-         */
-        @Override
-        public void onNewItem(int faceId, Face item) {
-            this.faceId = faceId;
-            this.item = item;
-            addFace(faceId, item);
-        }
-
-        /**
-         * Update the position/characteristics of the face within the overlay.
-         */
-        @Override
-        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
-//todo
-        }
-
-        /**
-         * Hide the graphic when the corresponding face was not detected.  This can happen for
-         * intermediate frames temporarily (e.g., if the face was momentarily blocked from
-         * view).
-         */
-        @Override
-        public void onMissing(FaceDetector.Detections<Face> detectionResults) {
-            removeFace(faceId);
-        }
-
-
-        @Override
-        public void onDone() {
-            removeFace(faceId);
+            return new CountFaceTracker(MainActivity.this);
         }
     }
 }
